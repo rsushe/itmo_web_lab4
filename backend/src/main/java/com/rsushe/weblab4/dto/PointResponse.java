@@ -16,5 +16,5 @@ public class PointResponse {
     private double radius;
     private boolean hit;
     private LocalDateTime creationDate;
-    private Instant workingTime;
+    private double workingTime;
 }

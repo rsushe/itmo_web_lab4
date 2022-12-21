@@ -14,7 +14,6 @@ import lombok.Setter;
 import lombok.Getter;
 import lombok.Builder;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -49,5 +48,5 @@ public class Point {
     private LocalDateTime creationDate;
 
     @Column(nullable = false)
-    private Instant workingTime;
+    private double workingTime;
 }
