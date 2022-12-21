@@ -23,17 +23,18 @@ public class PointController {
     }
 
     @GetMapping("/points")
-    public ResponseEntity<List<PointResponse>> getUserPoints(@RequestParam Double pointRadius, @RequestParam Integer timezone, @AuthenticationPrincipal AuthenticationToken authenticationToken) {
-        return ResponseEntity.ok(pointService.getUserPoints(pointRadius, timezone, (Long) authenticationToken.getCredentials())); //TODO user authentication
+    public ResponseEntity<List<PointResponse>> getUserPoints(@RequestParam Double pointRadius, @AuthenticationPrincipal Long userId) {
+
+        return ResponseEntity.ok(pointService.getUserPoints(pointRadius, userId));
     }
 
     @DeleteMapping("/points")
-    public void deleteUserPoints(@AuthenticationPrincipal AuthenticationToken authenticationToken) {
-        pointService.deleteUserPoints((Long) authenticationToken.getCredentials()); //TODO user authentication
+    public void deleteUserPoints(@AuthenticationPrincipal Long userId) {
+        pointService.deleteUserPoints(userId);
     }
 
     @PostMapping("/point")
-    public ResponseEntity<PointResponse> addPointToUser(@RequestBody PointRequest pointRequest, @AuthenticationPrincipal AuthenticationToken authenticationToken) {
-        return ResponseEntity.ok(pointService.addPointToUser(pointRequest, (Long) authenticationToken.getCredentials())); //TODO user authentication
+    public ResponseEntity<PointResponse> addPointToUser(@RequestBody PointRequest pointRequest, @AuthenticationPrincipal Long userId) {
+        return ResponseEntity.ok(pointService.addPointToUser(pointRequest, userId));
     }
 }
