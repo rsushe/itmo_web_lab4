@@ -1,5 +1,6 @@
 package com.rsushe.weblab4.service;
 
+import com.rsushe.weblab4.audited.Audited;
 import com.rsushe.weblab4.dto.AuthResponse;
 import com.rsushe.weblab4.entity.User;
 import com.rsushe.weblab4.exception.UserAlreadyExistException;
@@ -23,11 +24,11 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                           AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil) {
+    public AuthServiceImpl(UserRepository userRepository, AuthenticationManager authenticationManager,
+                           PasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
@@ -42,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Audited
     public AuthResponse loginUser(String username, String password) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
