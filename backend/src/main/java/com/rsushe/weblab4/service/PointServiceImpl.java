@@ -1,5 +1,6 @@
 package com.rsushe.weblab4.service;
 
+import com.rsushe.weblab4.audited.Audited;
 import com.rsushe.weblab4.converter.PointRequestToPointConverter;
 import com.rsushe.weblab4.converter.PointToPointResponseConverter;
 import com.rsushe.weblab4.dto.PointRequest;
@@ -18,9 +19,7 @@ import java.util.Optional;
 public class PointServiceImpl implements PointService {
 
     private final PointRepository pointRepository;
-
     private final UserRepository userRepository;
-
     private final PointToPointResponseConverter pointToPointResponseConverter;
     private final PointRequestToPointConverter pointRequestToPointConverter;
 
@@ -33,18 +32,14 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<PointResponse> getUserPoints(Double pointRadius, Integer timezone, Long userId) {
+    @Audited
+    public List<PointResponse> getUserPoints(Double pointRadius, Long userId) {
         List<Point> optionalPointResponses = pointRepository.getPointsByRadiusAndUserId(pointRadius, userId);
 
         return optionalPointResponses
                 .stream()
                 .map(pointToPointResponseConverter::convert)
-                .peek(pointResponse -> updatePointResponseCreationDate(pointResponse, timezone))
                 .toList();
-    }
-
-    private void updatePointResponseCreationDate(PointResponse pointResponse, Integer timezone) {
-        pointResponse.setCreationDate(pointResponse.getCreationDate().minusHours(timezone / 60));
     }
 
     @Override
@@ -54,12 +49,15 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public PointResponse addPointToUser(PointRequest pointRequest, long userId) {
+        long currentTime = System.currentTimeMillis();
+
         Point newPoint = pointRequestToPointConverter.convert(pointRequest);
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             throw new RuntimeException(); //TODO is it possible?
         }
         newPoint.setUser(optionalUser.get());
+        newPoint.setWorkingTime((System.currentTimeMillis() - currentTime) / 1000.0d);
 
         Point newTablePoint = pointRepository.save(newPoint);
         return pointToPointResponseConverter.convert(newTablePoint);

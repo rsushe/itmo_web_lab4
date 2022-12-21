@@ -6,7 +6,7 @@ import com.rsushe.weblab4.dto.PointResponse;
 import java.util.List;
 
 public interface PointService {
-    List<PointResponse> getUserPoints(Double pointRadius, Integer timezone, Long userId);
+    List<PointResponse> getUserPoints(Double pointRadius, Long userId);
 
     void deleteUserPoints(Long userId);
 
