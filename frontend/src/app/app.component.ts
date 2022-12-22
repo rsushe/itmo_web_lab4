@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { StorageService } from './services/storage.service';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,19 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'frontend';
+  isLoggedIn = false;
+  username?: string;
+  title: string = 'frontend';
+
+  constructor(private storageService: StorageService) { }
+
+  ngOnInit(): void {
+    this.isLoggedIn = this.storageService.isLoggedIn();
+  }
+
+  logout(): void {
+    this.storageService.clean();
+
+    window.location.reload();
+  }
 }

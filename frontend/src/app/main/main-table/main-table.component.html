@@ -1,0 +1,16 @@
+<div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th *ngFor="let column of headers">
+                    {{column}}
+                </th>
+            </tr>
+        </thead>
+        <tr *ngFor="let row of rows">
+            <td *ngFor="let column of headers">
+                {{row[column]}}
+            </td>
+        </tr>
+    </table>
+</div>

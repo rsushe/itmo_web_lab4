@@ -1,0 +1,56 @@
+<div class="col-md-12">
+    <div class="card card-container">
+      <form
+        name="form"
+        (ngSubmit)="f.form.valid && onSubmit()"
+        #f="ngForm"
+        [formGroup]="pointForm"
+        novalidate
+      >
+
+      <div class="form-group ">
+        <label for="x_value">
+          <select id="x_value" formControlName="x" class="form-select form-select-sm" required>
+            <option value="" disabled selected>Choose X value</option>
+            <option *ngFor="let x of x_values" [ngValue]="x">
+              {{ x }}
+            </option>
+          </select>
+        </label>
+      </div>
+
+        <div class="form-group">
+          <label for="y_value">Enter y: </label>
+          <input
+            type="text"
+            class="form-control"
+            name="y"
+            formControlName="y"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+            <label for="r_value">
+              <select id="r_value" formControlName="radius" class="form-select form-select-sm " (change)="rChange($event)">
+                <option value="" disabled selected>Choose R value</option>
+                <option *ngFor="let r of r_values" [ngValue]="r">
+                  {{ r }}
+                </option>
+              </select>
+            </label>
+        </div>
+
+        <div class="form-group">
+          <button class="btn btn-primary btn-block">
+            Submit
+          </button>
+        </div>
+        <div class="form-group">
+            <div *ngIf="errorMessage!=''" class="alert alert-danger" style="margin-top: 10px;">
+                {{errorMessage}}
+            </div>
+        </div>
+      </form>
+    </div>
+  </div>
