@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface PointRepository extends JpaRepository<Point, Long> {
+    List<Point> getPointsByUserId(Long userId);
+
     List<Point> getPointsByRadiusAndUserId(Double radius, Long userId);
 
     void deletePointsByUserId(Long userId);

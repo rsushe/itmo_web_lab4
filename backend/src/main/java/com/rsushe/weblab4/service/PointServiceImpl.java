@@ -33,10 +33,12 @@ public class PointServiceImpl implements PointService {
 
     @Override
     @Audited
-    public List<PointResponse> getUserPoints(Double pointRadius, Long userId) {
-        List<Point> optionalPointResponses = pointRepository.getPointsByRadiusAndUserId(pointRadius, userId);
+    public List<PointResponse> getUserPoints(Optional<Double> pointRadius, Long userId) {
+        List<Point> points;
+        if (pointRadius.isEmpty()) points = pointRepository.getPointsByUserId(userId);
+        else points = pointRepository.getPointsByRadiusAndUserId(pointRadius.get(), userId);
 
-        return optionalPointResponses
+        return points
                 .stream()
                 .map(pointToPointResponseConverter::convert)
                 .toList();

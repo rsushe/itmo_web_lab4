@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -23,7 +24,7 @@ public class PointController {
     }
 
     @GetMapping("/points")
-    public ResponseEntity<List<PointResponse>> getUserPoints(@RequestParam Double pointRadius, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<List<PointResponse>> getUserPoints(@RequestParam Optional<Double> pointRadius, @AuthenticationPrincipal Long userId) {
 
         return ResponseEntity.ok(pointService.getUserPoints(pointRadius, userId));
     }
