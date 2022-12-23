@@ -1,9 +1,9 @@
 <div *ngIf="isLoggedIn">
     <div class="row">
         <div class="col">
-            <app-main-graph class="col-sm-6"></app-main-graph>
-            <app-main-form class="col-sm-6"></app-main-form>
+            <app-main-graph class="col-sm-6" (addEvent)="table.addPoint($event)" #graph></app-main-graph>
+            <app-main-form class="col-sm-6" (addEvent)="table.addPoint($event); graph.addPoint($event)" (rChangeEvent)="graph.refresh($event)"></app-main-form>
         </div>
-        <app-main-table class="col-sm-6"></app-main-table>
+        <app-main-table class="col-sm-6" #table></app-main-table>
     </div>
 </div>

@@ -2,8 +2,6 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { PointRequest } from 'src/app/dto/PointRequest';
 import { PointResponse } from 'src/app/dto/PointResponse';
 import { PointService } from 'src/app/services/point.service';
-import * as JXG from "jsxgraph";
-import {GeometryElement} from "jsxgraph";
 import { StorageService } from '../../services/storage.service';
 
 @Component({
@@ -14,44 +12,50 @@ import { StorageService } from '../../services/storage.service';
 export class MainGraphComponent implements OnInit {
   points: PointResponse[] = [];
 
-  board!: JXG.Board
-
-  figures: GeometryElement[] = [];
-  dr_points: GeometryElement[] = [];
-
-  r: number = -1000;
+  pointsToDraw: PointResponse[] = [];
 
   errorMessage: string = "";
 
+  r: number = -1;
+
   @Output() addEvent = new EventEmitter<PointResponse>();
 
-  constructor(private service: PointService) {
+  constructor(private pointService: PointService) {
   }
 
   ngOnInit() {
-    this.r = -1000;
-    this.board = JXG.JSXGraph.initBoard('jxgbox', {boundingbox: [-5, 5, 5, -5], axis: true, showCopyright: false});
+    this.pointService.getPoints().subscribe(data => {
+      console.log(data);
+      this.points = data;
+    });
   }
 
   onClick(e: MouseEvent) {
-    // @ts-ignore
-    if (e.button === 2 || e.target.className === 'JXG_navigation_button') {
-      return;
-    }
 
-    if (this.r != -1000) {
-      let coords = this.board.getUsrCoordsOfMouse(event);
-      let x = coords[0].toFixed(2);
-      let y = coords[1].toFixed(2);
-      let r = this.r
-      console.log(x + " " + y + " " + r);
+    if (this.r != -1) {
+      let target = document.getElementById("svg-graph")!.getBoundingClientRect();
+      let x = Math.round(e.clientX - target?.left);
+      let y = e.clientY - target?.top;
+      let xForServer = ((x - 150) / (100 / this.r)).toFixed(3);
+      let yForServer = ((y - 150 + window.scrollY) / (-100 / this.r)).toFixed(3);
 
-      let point = new PointRequest(+x, +y, r);
-      this.savePoint(point)
+      let request = new PointRequest(+xForServer, +yForServer, this.r);
+
+      this.savePoint(request);
+      // let coords = this.board.getUsrCoordsOfMouse(event);
+      // let x = coords[0].toFixed(2);
+      // let y = coords[1].toFixed(2);
+      // let r = this.r
+      // console.log(x + " " + y + " " + r);
+
+      // let point = new PointRequest(+x, +y, r);
+      // this.savePoint(point)
     } else {
       this.errorMessage = "You have to choose R"
     }
   }
+
+
 
   addPoint(point: PointResponse) {
     this.points.push(point);
@@ -59,7 +63,7 @@ export class MainGraphComponent implements OnInit {
   }
 
   savePoint(point: PointRequest) {
-    this.service.postPoint(point).subscribe({
+    this.pointService.postPoint(point).subscribe({
       next: (data) => {
         console.log("New point " + data);
         this.addEvent.emit(data);
@@ -75,71 +79,28 @@ export class MainGraphComponent implements OnInit {
     this.r = r;
     this.errorMessage = ''
     console.log("Graph: " + r);
-    this.clearBoard();
-    this.drawFigures(r);
-    this.drawPoints(r);
+    this.refreshPointsToDraw(r);
+    console.log(this.pointsToDraw);
   }
 
-  drawPoints(r: number) {
+  refreshPointsToDraw(r: number) {
+    this.pointsToDraw = [];
+    console.log("points: ", this.points);
     for (const point of this.points) {
       if (point.radius == r) {
-        this.dr_points.push(<GeometryElement>this.createPoint(point));
+        this.pointsToDraw.push(point);
       }
 
     }
   }
 
-  drawFigures(r: number) {
-    this.figures.push(this.createRectangle(r));
-    this.figures.push(this.createTriangle(r));
-    this.figures.push(this.createCircle(r));
-  }
-
   createPoint(point: PointResponse) {
     let color = (point.hit ? "#7ce57c" : "#dc4a4a");
-    return this.board.create("point", [point.x, point.y], {
-      name: '', fixed: true, fillColor: color, fillOpacity: 1,
-      strokewidth: 0
-    });
+    // return this.board.create("point", [point.x, point.y], {
+      // name: '', fixed: true, fillColor: color, fillOpacity: 1,
+      // strokewidth: 0
+    // });
 
-  }
-
-  createRectangle(r: number) {
-    let rectanglePoint1 = this.board.create('point', [0, 0], {name: '', fixed: true, visible: false});
-    let rectanglePoint2 = this.board.create('point', [-r, 0], {name: '', fixed: true, visible: false});
-    let rectanglePoint3 = this.board.create('point', [-r, r / 2], {name: '', fixed: true, visible: false});
-    let rectanglePoint4 = this.board.create('point', [0, r / 2], {name: '', fixed: true, visible: false});
-    return this.board.create('polygon', [rectanglePoint1, rectanglePoint2, rectanglePoint3, rectanglePoint4],
-      {fillColor: 'rgba(18,54,234,0.92)', fillOpacity: 1});
-  }
-
-  createTriangle(r: number) {
-    let trianglePoint1 = this.board.create('point', [0, 0], {name: '', fixed: true, visible: false});
-    let trianglePoint2 = this.board.create('point', [r / 2, 0], {name: '', fixed: true, visible: false});
-    let trianglePoint3 = this.board.create('point', [0, r / 2], {name: '', fixed: true, visible: false});
-    return this.board.create('polygon', [trianglePoint1, trianglePoint2, trianglePoint3], {
-      fillColor: 'rgba(18,54,234,0.92)',
-      fillOpacity: 1
-    });
-  }
-
-  createCircle(r: number) {
-    let circlePoint1 = this.board.create('point', [-r / 2, 0], {name: '', fixed: true, visible: false});
-    let circlePoint2 = this.board.create('point', [0, -r / 2], {name: '', fixed: true, visible: false});
-    let centerPoint = this.board.create('point', [0, 0], {name: '', fixed: true, visible: false});
-
-    return this.board.create('sector', [centerPoint, circlePoint1, circlePoint2],
-      {fillColor: 'rgba(18,54,234,0.92)', fillOpacity: 1});
-  }
-
-  clearBoard() {
-    for (const object of this.figures) {
-      this.board.removeObject(object);
-    }
-
-    for (const point of this.dr_points) {
-      this.board.removeObject(point);
-    }
   }
 
 }

@@ -15,6 +15,7 @@ export class AppComponent {
 
   ngOnInit(): void {
     this.isLoggedIn = this.storageService.isLoggedIn();
+    this.username = this.storageService.getUsername();
   }
 
   logout(): void {

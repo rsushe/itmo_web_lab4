@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormBuilder } from "@angular/forms";
 import { PointService } from 'src/app/services/point.service';
 import { PointRequest } from 'src/app/dto/PointRequest';
+import { PointResponse } from 'src/app/dto/PointResponse';
 
 
 @Component({
@@ -24,6 +25,10 @@ export class MainFormComponent {
   y_min_value: number = -5;
   y_max_value: number = 5;
   r_values: number[] = [-4, -3, -2, -1, 0, 1, 2, 3, 4];
+
+  @Output() addEvent = new EventEmitter<PointResponse>();
+  @Output() rChangeEvent = new EventEmitter<number>()
+
   rows: any[] = [];
   headers = ["x", "y", "radius", "hit", "creationDate", "workingTime"];
 
@@ -56,9 +61,7 @@ export class MainFormComponent {
       this.pointService.postPoint(point).subscribe({
         next: (data) => {
           console.log("form data after request: ", data);
-          data.creationDate = new Date(data.creationDate);
-          this.rows.push(data);
-          this.pointForm.reset();
+          this.addEvent.emit(data);
         },
         error: (err) => {
           console.log(err);
@@ -73,15 +76,16 @@ export class MainFormComponent {
       let r = event.target.value.split(": ")[1];
       console.log(r);
 
-      this.pointService.getPointsByRadius(+r).subscribe({
-        next: (data) => {
-          console.log(data);
-          this.rows = data;
-        },
-        error: (err) => {
-          console.log(err);
-        }
-      })
+      this.rChangeEvent.emit(r);
+      // this.pointService.getPointsByRadius(+r).subscribe({
+      //   next: (data) => {
+      //     console.log(data);
+      //     this.rows = data;
+      //   },
+      //   error: (err) => {
+      //     console.log(err);
+      //   }
+      // })
     }
   }
 }
